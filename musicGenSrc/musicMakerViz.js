@@ -65,7 +65,10 @@ MakerViz.adjustSVGArea = function() {
     this.printFinishButton(buttonAreas);
     this.printInstChangeZone(buttonAreas);
     this.printInstChangeAreas(buttonAreas);
-    //this.printVoronoi();
+
+    var insBarContainer = this.printRecordedInstruments();
+    this.printPattern(insBarContainer);
+
     this.drawIndications();
 }
 
@@ -352,26 +355,26 @@ MakerViz.printRecordedInstruments = function() {
 
         lContainer.select(".line")
             .classed("opaque-pattern", this.isCurrentColor(inst) ? false : true)
-            .datum(pattern[inst])
+            .datum(pattern[inst] || [])
               .transition()
                 .attr("d", line)
                 .style("stroke", color);
         lContainer.select(".area")
             .classed("opaque-pattern", this.isCurrentColor(inst) ? false : true)
-            .datum(pattern[inst])
+            .datum(pattern[inst] || [])
               .transition()
                 .attr("d", area)
                 .style("fill", color);
 
         lContainer.select(".inverse-line")
             .classed("opaque-pattern", this.isCurrentColor(inst) ? false : true)
-            .datum(pattern[inst])
+            .datum(pattern[inst] || [])
               .transition()
                 .attr("d", lineInverse)
                 .style("stroke", color);
         lContainer.select(".inverse-area")
             .classed("opaque-pattern", this.isCurrentColor(inst) ? false : true)
-            .datum(pattern[inst])
+            .datum(pattern[inst] || [])
               .transition()
                 .attr("d", areaInverse)
                 .style("fill", color);

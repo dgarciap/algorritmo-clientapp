@@ -32,7 +32,7 @@ HandPlayer.patternRecordingEnabled = true;
 /**
  * Array with active patterns.
  */
-HandPlayer.activePatterns = [];
+HandPlayer.activePatterns = [{index: 0, pattern: new Array(LeapManager.INSTRUMENT_LIST.length)}];
 
 HandPlayer.timeoutId = undefined;
 
@@ -349,7 +349,7 @@ HandPlayer.processTones = function() {
     this.playActivePatterns();
     this.moveActivePatternsForward();
 
-    if(LeapManager.handArray[0]) MakerViz.render(LeapManager.handArray[0].currentTone);
+    MakerViz.render(LeapManager.handArray[0] ? LeapManager.handArray[0].currentTone : null);
 
     return true;
 }
