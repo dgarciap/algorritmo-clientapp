@@ -23,6 +23,14 @@ MakerViz.PROGRESS_BAR_HMARGIN = 25;
 
 MakerViz.LEGEND_WIDTH_PERCENT = 3;
 
+MakerViz.FINISH_MESSAGE_AREA_HEIGHT = 75;
+
+//Counter with the number of tones played.
+MakerViz.numberOfTones = 0;
+
+//Number of tones that the user should play to unlock the finish button.
+MakerViz.FINISH_THREDSHOLD = 15;
+
 //Constant containing render time.
 MakerViz.RENDER_INTERVAL_TIME = 300;
 
@@ -61,20 +69,64 @@ MakerViz.adjustSVGArea = function() {
     this.drawIndications();
 }
 
+MakerViz.printFinishMessage = function(playAreaContainer) {
+    var radius = MakerViz.PLAYAREA_HEIGHT * MakerViz.INST_CHANGE_SELECTED_HEIGHT_PERCENT/(2*100);
+    var margin = (LeapManager.NO_TONE_MARGIN_PERCENT*window.innerWidth/100 - radius*2)/2;
+    var rightMarginStartingWidth = window.innerWidth - LeapManager.NO_TONE_MARGIN_PERCENT*window.innerWidth/100
+    var finishMessageGroup = playAreaContainer.append("g").classed("finish-message", true);
+    var width = LeapManager.NO_TONE_MARGIN_PERCENT*window.innerWidth/100 - margin;
+    finishMessageGroup.append("rect")
+        .attr("class", "finish-message-area")
+        .attr("x", margin/2 + rightMarginStartingWidth)
+        .attr("y", MakerViz.PLAYAREA_HEIGHT - margin*0.5 - radius*2 - this.FINISH_MESSAGE_AREA_HEIGHT)
+        .attr("rx", "10")
+        .attr("ry", "10")
+        .attr("width", width)
+        .attr("height", this.FINISH_MESSAGE_AREA_HEIGHT);
+
+    finishMessageGroup.append("text")
+        .attr("class", "finish-message-text")
+        .attr("x", margin/2 + rightMarginStartingWidth + width/2)
+        .attr("y", MakerViz.PLAYAREA_HEIGHT - margin*0.5 - radius*2 - this.FINISH_MESSAGE_AREA_HEIGHT*3/4)
+        .attr("width", LeapManager.NO_TONE_MARGIN_PERCENT*window.innerWidth/100 - margin)
+        .attr("height", this.FINISH_MESSAGE_AREA_HEIGHT)
+        .append("tspan")
+            .attr("x", margin/2 + rightMarginStartingWidth + width/2)
+            .attr("dy", 0)
+            .text("Go and play")
+        .append("tspan")
+            .attr("x", margin/2 + rightMarginStartingWidth + width/2)
+            .attr("dy", 20)
+            .text("more tones")
+        .append("tspan")
+            .attr("x", margin/2 + rightMarginStartingWidth + width/2)
+            .attr("dy", 20)
+            .text("before finishing!");
+};
+
 MakerViz.printFinishButton = function(playAreaContainer) {
-    var margin = MakerViz.PLAYAREA_HEIGHT * MakerViz.INST_CHANGE_HMARGIN_PERCENT / 100;
+    var radius = MakerViz.PLAYAREA_HEIGHT * MakerViz.INST_CHANGE_SELECTED_HEIGHT_PERCENT/(2*100);
+    var margin = (LeapManager.NO_TONE_MARGIN_PERCENT*window.innerWidth/100 - radius*2)/2;
     var radius = MakerViz.PLAYAREA_HEIGHT * MakerViz.INST_CHANGE_SELECTED_HEIGHT_PERCENT/(2*100);
     var rightMarginStartingWidth = window.innerWidth - LeapManager.NO_TONE_MARGIN_PERCENT*window.innerWidth/100
-    playAreaContainer.append("circle")
-        .attr("class", "finish-button")
-        .attr("cx", margin + radius + rightMarginStartingWidth)
-        .attr("cy", MakerViz.PLAYAREA_HEIGHT - margin - radius)
-        .attr("r", radius);
-    playAreaContainer.append("text")
-        .attr("class", "finish-label")
-        .attr("x", margin + radius + rightMarginStartingWidth)
-        .attr("y", MakerViz.PLAYAREA_HEIGHT - margin - radius)
-        .text("Finish!");
+    if(playAreaContainer.select(".finish-button").size() === 0) {
+        playAreaContainer.append("circle")
+            .attr("class", "finish-button")
+            .attr("cx", margin + radius + rightMarginStartingWidth)
+            .attr("cy", MakerViz.PLAYAREA_HEIGHT - margin - radius)
+            .attr("r", radius);
+        playAreaContainer.append("text")
+            .attr("class", "finish-label")
+            .attr("x", margin + radius + rightMarginStartingWidth)
+            .attr("y", MakerViz.PLAYAREA_HEIGHT - margin - radius)
+            .text("Finish!");
+
+        MakerViz.printFinishMessage(playAreaContainer);
+    }
+
+    if(this.isFinishLocked())
+        playAreaContainer.select(".finish-button").classed("locked-button", true);
+    else playAreaContainer.select(".finish-button").classed("locked-button", false);
 };
 
 MakerViz.printInstChangeZone = function(playAreaContainer) {
@@ -345,7 +397,7 @@ MakerViz.printPattern = function(instrumentBarContainer) {
     d3.select(".pattern-bar-completed").remove();
     d3.select(".pattern-bar-uncompleted").remove();
 
-    var percentage = HandPlayer.activePatterns[0] ? ((HandPlayer.activePatterns[0].index - 1)*100/HandPlayer.NUM_TONES_PATTERN) : 0;
+    var percentage = HandPlayer.activePatterns[0] ? (HandPlayer.activePatterns[0].index*100/HandPlayer.NUM_TONES_PATTERN) : 0;
 
     var coef = percentage/100;
 
@@ -454,13 +506,13 @@ MakerViz.printLegend = function(numLines, totalHeight) {
         .attr("class", "legend-text legend-low")
         .attr("x", legendWidth/2)
         .attr("y", totalHeight-lineHeight - 15)
-        .text("Low");
+        .text("Bass");
 
     legendContainer.append("text")
         .attr("class", "legend-text legend-high")
         .attr("x", legendWidth/2)
         .attr("y", 15)
-        .text("High");
+        .text("Treble");
 
     legendContainer.append("svg:image")
         .attr("xlink:href", "imgs/clef.png")
@@ -562,7 +614,10 @@ MakerViz.updateHandOnScreen = function(handFrame, handState) {
 };
 
 
-MakerViz.render = function() {
+MakerViz.render = function(currentTone) {
+    if(currentTone)
+        ++this.numberOfTones;
+    this.printFinishButton(d3.select(".button-areas"));
     var insBarContainer = this.printRecordedInstruments();
     this.printPattern(insBarContainer);
 };
@@ -586,3 +641,19 @@ MakerViz.drawIndications = function() {
         .attr("y", window.innerHeight/4)
         .attr("preserveAspectRatio");
 };
+
+/**
+ * Method which returns true if finish button is locked, false otherwise.
+ * @return {Boolean} [description]
+ */
+MakerViz.isFinishLocked = function() {
+    return this.numberOfTones <= this.FINISH_THREDSHOLD;
+};
+
+MakerViz.showFinishWarning = function() {
+    d3.selectAll(".finish-message").transition().style("opacity", 1);
+
+    setTimeout(function() {
+        d3.selectAll(".finish-message").transition().style("opacity", 0);
+    }, 3000)
+}

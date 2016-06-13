@@ -381,8 +381,10 @@ Leap.loop(controllerOptions, function(frame) {
     else LeapManager.removeCurrentHands();
 
     if(LeapManager.isClapping(frame.hands) || 
-        MusicGenGlobal.isFinishPressed(this.getPositionPercentage(handFrame))) 
-            MusicGenGlobal.finishComposition();
+        MusicGenGlobal.isFinishPressed(this.getPositionPercentage(handFrame))) {
+            if(MakerViz.isFinishLocked()) MakerViz.showFinishWarning();
+            else MusicGenGlobal.finishComposition();
+        }
 
     // Store frame for motion functions
     LeapManager.previousFrame = frame;

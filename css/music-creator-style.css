@@ -103,11 +103,32 @@ path.line {
 }
 
 .finish-button {
-    fill: red;
+    fill: #fe3e3b;
+    -webkit-transition: fill 2s; /* Safari */
+    transition: fill 2s;
+}
+
+.locked-button {
+    opacity: 0.4;
+}
+
+.finish-message {
+    opacity: 0;
+}
+
+.finish-message-area {
+    fill: white;
 }
 
 .clef-icon {
     align: middle;
+}
+
+.finish-message-text {
+    alignment-baseline: middle;
+    text-anchor: middle;
+    font-family: "Aller Regular", Calibri;
+    fill: black;
 }
 
 .finish-label {

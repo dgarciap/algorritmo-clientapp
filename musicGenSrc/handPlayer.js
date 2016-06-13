@@ -349,7 +349,7 @@ HandPlayer.processTones = function() {
     this.playActivePatterns();
     this.moveActivePatternsForward();
 
-    MakerViz.render();
+    if(LeapManager.handArray[0]) MakerViz.render(LeapManager.handArray[0].currentTone);
 
     return true;
 }
