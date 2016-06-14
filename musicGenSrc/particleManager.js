@@ -53,7 +53,7 @@ ParticleManager.stopOptions = {
 };
 
 ParticleManager.safeZoneSpawnerOptions = {
-    spawnRate: 10,
+    spawnRate: 0,
     horizontalSpeed: 1.5,
     verticalSpeed: 1.33,
     timeScale: 0.2

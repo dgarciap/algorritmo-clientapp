@@ -19,6 +19,7 @@ MakerViz.PROGRESS_BAR_HEIGHT = 25;
 MakerViz.MARGIN_BETWEEN_BARS = 3;
 
 MakerViz.TITLE_SPACE = 130;
+MakerViz.SUBTITLE_HEIGHT = 50;
 MakerViz.PROGRESS_BAR_HMARGIN = 25;
 
 MakerViz.LEGEND_WIDTH_PERCENT = 3;
@@ -34,14 +35,14 @@ MakerViz.FINISH_THREDSHOLD = 15;
 //Constant containing render time.
 MakerViz.RENDER_INTERVAL_TIME = 300;
 
-MakerViz.PLAYAREA_HEIGHT = window.innerHeight - LeapManager.INSTRUMENT_LIST.length * (MakerViz.PROGRESS_BAR_HEIGHT + MakerViz.MARGIN_BETWEEN_BARS*2) - MakerViz.TITLE_SPACE - MakerViz.PROGRESS_BAR_HMARGIN*2;
+MakerViz.PLAYAREA_HEIGHT = window.innerHeight - LeapManager.INSTRUMENT_LIST.length * (MakerViz.PROGRESS_BAR_HEIGHT + MakerViz.MARGIN_BETWEEN_BARS*2) - MakerViz.TITLE_SPACE - MakerViz.PROGRESS_BAR_HMARGIN*2 - MakerViz.SUBTITLE_HEIGHT;
 
 MakerViz.adjustSVGArea = function() {
     d3.select(".svg-tag").remove();
 
     var svg = d3.select("#svg-container").append("svg")
         .attr("width", window.innerWidth)
-        .attr("height", window.innerHeight - MakerViz.TITLE_SPACE)
+        .attr("height", window.innerHeight - MakerViz.TITLE_SPACE - MakerViz.SUBTITLE_HEIGHT)
         .attr("class", "svg-tag");
 
     var playableHeight = MakerViz.PLAYAREA_HEIGHT;
@@ -50,7 +51,7 @@ MakerViz.adjustSVGArea = function() {
         .attr("width", window.innerWidth)
         .attr("height", playableHeight)
         .attr("class", "play-area")
-        .attr("transform", "translate(0," + (window.innerHeight - MakerViz.TITLE_SPACE - playableHeight) + ")");
+        .attr("transform", "translate(0," + (window.innerHeight - MakerViz.TITLE_SPACE - playableHeight - MakerViz.SUBTITLE_HEIGHT) + ")");
 
     //this.printSafeZone();
 
@@ -567,6 +568,15 @@ MakerViz.printLines = function(numLines, width, totalHeight) {
  */
 MakerViz.currentHandTimeoutId = undefined;
 
+
+/**
+ * Variable containing the id of the timeout set to show the main info
+ * when we don't know anything about the user a period of time.
+ * @type {[type]}
+ */
+MakerViz.mainInfoTimeoutId = undefined;
+
+
 /**
  * Function in charge of cleaning user pointer.
  */
@@ -576,44 +586,51 @@ MakerViz.clearUserPointer = function() {
             .duration(1000)
             .attr("r", "0px");
     ParticleManager.clearUserInformation();
-    
-    //Show info.
-    d3.select("image.main-info-img")
-        .transition()
-            .duration(2000)
-            .attr("opacity", 1);
 };
 
 MakerViz.updateHandOnScreen = function(handFrame, handState) {
-    //Hide info.
-    d3.select("image.main-info-img").attr("opacity", 0);
-    
+
+    if(this.mainInfoTimeoutId) clearTimeout(this.mainInfoTimeoutId);
     if(this.currentHandTimeoutId) clearTimeout(this.currentHandTimeoutId);
 
     var positionPercentage = MusicGenGlobal.getPositionPercentage(handFrame);
 
     var left = positionPercentage.left;
     var top = positionPercentage.top;
+    var circleClass = "hand-mark ";
+
+    if(MusicGenGlobal.isPlaying(handFrame)) {
+        //Hide info If the user is playing (in case the info is visible).
+        d3.select(".main-info").style("opacity", 0);
+        circleClass += "grabbing ";
+
+        ParticleManager.updateUserInformation(left*window.innerWidth/100, top*this.PLAYAREA_HEIGHT/100, ParticleManager.PLAYING, handState.instrumentIndex);
+    }
+    else {
+        circleClass += "no-grabbing ";
+        ParticleManager.updateUserInformation(left*window.innerWidth/100, top*this.PLAYAREA_HEIGHT/100, ParticleManager.STOPPED, handState.instrumentIndex);
+    }
+
+    if(!MusicGenGlobal.isOnPlayingZone(handFrame)) {
+        circleClass += "on-safe-zone ";
+        ParticleManager.updateUserInformation(left*window.innerWidth/100, top*this.PLAYAREA_HEIGHT/100, ParticleManager.ON_SAFE_ZONE, handState.instrumentIndex);
+    }
+
     d3.selectAll("circle.hand-mark").remove();
     var circle = d3.select(".circle-container").append("circle")
         .attr("cx", left*window.innerWidth/100 + "px")
         .attr("cy", top*this.PLAYAREA_HEIGHT/100 + "px")
         .attr("r", this.CIRCLE_RADIUS)
-        .attr("class", "hand-mark " + (MusicGenGlobal.isPlaying(handFrame) ? "grabbing":"no-grabbing") + " id-" + handFrame.id)
+        .attr("class", circleClass + " id-" + handFrame.id)
         .style("fill", LeapManager.INSTRUMENT_LIST[handState.instrumentIndex].color);
-    if(MusicGenGlobal.isPlaying(handFrame)) {
-        ParticleManager.updateUserInformation(left*window.innerWidth/100, top*this.PLAYAREA_HEIGHT/100, ParticleManager.PLAYING, handState.instrumentIndex);
-    }
-    else {
-        ParticleManager.updateUserInformation(left*window.innerWidth/100, top*this.PLAYAREA_HEIGHT/100, ParticleManager.STOPPED, handState.instrumentIndex);
-    }
-
-    if(!MusicGenGlobal.isOnPlayingZone(handFrame)) 
-        ParticleManager.updateUserInformation(left*window.innerWidth/100, top*this.PLAYAREA_HEIGHT/100, ParticleManager.ON_SAFE_ZONE, handState.instrumentIndex);
+    
 
     if(MusicGenGlobal.LEAP_ENABLED)
         this.currentHandTimeoutId = 
             setTimeout(function() { MakerViz.clearUserPointer(); }, 200);
+
+    this.mainInfoTimeoutId = 
+            setTimeout(function() { MakerViz.showMainInfo(); }, 5000);
 };
 
 
@@ -635,14 +652,31 @@ MakerViz.applyInstChangeVisuals = function() {
 
 
 MakerViz.drawIndications = function() {
-    d3.select(".svg-tag").append("image")
-        .attr("href", "imgs/main-info.png")
+    var infoGroup = d3.select(".svg-tag").append("g")
+        .attr("class", "main-info")
+        .attr("transform", "translate("+ window.innerWidth/3 +"," + window.innerHeight/3 + ")");
+    
+    infoGroup.append("image")
+        .attr("href", "imgs/click.png")
         .attr("class", "main-info-img")
-        .attr("width", window.innerWidth*2/4)
-        .attr("height", window.innerHeight*2/4)
-        .attr("x", window.innerWidth/4)
-        .attr("y", window.innerHeight/4)
+        .attr("width", window.innerWidth/8)
+        .attr("height", window.innerWidth/8)
+        .attr("x", 0)
+        .attr("y", 0)
         .attr("preserveAspectRatio");
+
+    infoGroup.append("text")
+        .attr("class", "main-info-text")
+        .append("tspan")
+            .attr("x", window.innerWidth/8)
+            .attr("y", 0)
+            .attr("dy", 30)
+            .text("Click to")
+        .append("tspan")
+            .attr("x", window.innerWidth/8)
+            .attr("y", 0)
+            .attr("dy", 60)
+            .text("compose");
 };
 
 /**
@@ -659,4 +693,15 @@ MakerViz.showFinishWarning = function() {
     setTimeout(function() {
         d3.selectAll(".finish-message").transition().style("opacity", 0);
     }, 3000)
+}
+
+/**
+ * Change opacity of main info to 1, making it visible.
+ * @return {[type]} [description]
+ */
+MakerViz.showMainInfo = function() {
+    d3.select(".main-info")
+        .transition()
+            .duration(2000)
+            .style("opacity", 1);
 }

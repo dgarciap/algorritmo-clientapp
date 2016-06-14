@@ -50,6 +50,10 @@ svg {
     opacity: 1;
 }
 
+.on-safe-zone {
+    fill: #4d4d4d !important;
+}
+
 .speechB {
     opacity: 0.6;
 }
@@ -178,4 +182,25 @@ path.line {
 .opaque-pattern {
     opacity: 0.4;
     stroke-opacity: 0.2;
+}
+
+.subtitle {
+    height: 50px;
+    width: 100%;
+    font-size: 36px;
+    font-family: "Aller Regular", Calibri;
+    background: #f2f0e3;
+    text-align: center;
+    color: #4d4d4d;
+}
+
+.main-info-text {
+    font-size: 46px;
+    font-family: "Aller Regular", Calibri;
+    fill: #2d2828;
+    font-weight: bold;
+}
+
+.subtitle p {
+    margin: 6px;
 }
