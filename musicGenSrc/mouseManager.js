@@ -48,7 +48,7 @@ MouseManager.mouseoverBehaviour = function() {
 
 MouseManager.processMouseOver = function(mouseEvent, handState) {
     if(this.pressed && this.isOnPlayingZone(mouseEvent)) {
-        var tone = this.getTone(mouseEvent);
+        var tone = this.getTone(mouseEvent, handState.instrumentIndex);
         handState.currentTone = tone;
     }
     else handState.currentTone = null;
@@ -70,10 +70,10 @@ MouseManager.isOnPlayingZone = function(mouseEvent) {
         mouseEvent.clientX < window.innerWidth - LeapManager.NO_TONE_MARGIN_PERCENT * window.innerWidth/100);
 };
 
-MouseManager.getTone = function(mouseEvent) {
+MouseManager.getTone = function(mouseEvent, instrumentIndex) {
     var posPerct = this.getPositionPercentage(mouseEvent);
 
-    var semitoneHeight = 100/LeapManager.NUMBER_OF_TONES;
+    var semitoneHeight = 100/LeapManager.INSTRUMENT_LIST[instrumentIndex].numTones;
 
     return parseInt((100-posPerct.top) / semitoneHeight);
 };

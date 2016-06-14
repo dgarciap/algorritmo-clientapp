@@ -18,9 +18,6 @@ HandPlayer.DELAY = 0.031;
 //Each tick last 8 ticks.
 HandPlayer.NUMBER_TICKES_TONE = 8;
 
-//The first midi note id is:
-HandPlayer.FIRST_NOTE_ID = 21;
-
 HandPlayer.midiStreamerLoaded = false;
 
 HandPlayer.recordEnabled = false;
@@ -43,7 +40,7 @@ HandPlayer.timeoutId = undefined;
  * One unit in our tone is TONE_GAP units on midi tones.
  * This means that tone 2 is in reality tone 2*HandPlayer.TONE_GAP.
  */
-HandPlayer.TONE_GAP = 3;
+HandPlayer.TONE_GAP = 1;
 
 /**
  * Contains information about a recorded track.
@@ -166,9 +163,10 @@ MIDI.loadPlugin({
  * Given a raw tone (id comming from the hand position) returns its equivalent
  * tone in the MIDI format.
  */
-HandPlayer.getValidTone = function(rawTone) {
+HandPlayer.getValidTone = function(rawTone, channel) {
+    var instIndex = LeapManager.getInstrumentFromChannel(channel);
     if(rawTone == -1) return rawTone;
-    return rawTone * HandPlayer.TONE_GAP + HandPlayer.FIRST_NOTE_ID;
+    return rawTone * HandPlayer.TONE_GAP + LeapManager.INSTRUMENT_LIST[instIndex].firstToneId;
 }
 
 /**
@@ -209,8 +207,8 @@ HandPlayer.addTonesToTrack = function(track, customTrack, toneIndex, tones, last
         if(noteOn) {
             if(lastTones[0] !== tones[i] && tones[i] !== -1) {
                 //If first note.
-                if(isSilence) track.noteOn(channel, this.getValidTone(tones[i]), wait, HandPlayer.VELOCITY);
-                else track.noteOn(channel, this.getValidTone(tones[i]));
+                if(isSilence) track.noteOn(channel, this.getValidTone(tones[i], channel), wait, HandPlayer.VELOCITY);
+                else track.noteOn(channel, this.getValidTone(tones[i], channel));
                 isSilence = false;
             }
         }
@@ -218,8 +216,8 @@ HandPlayer.addTonesToTrack = function(track, customTrack, toneIndex, tones, last
             if(lastTones[0] !== tones[i] && lastTones[0] !== -1) {
                 var numTicks = this.getTimes(customTrack, toneIndex - 1, lastTones);
                 //If first note.
-                if(isSilence) track.noteOff(channel, this.getValidTone(lastTones[0]), numTicks);
-                else track.noteOff(channel, this.getValidTone(lastTones[0]));
+                if(isSilence) track.noteOff(channel, this.getValidTone(lastTones[0], channel), numTicks);
+                else track.noteOff(channel, this.getValidTone(lastTones[0], channel));
             }
         }
     }
@@ -337,9 +335,10 @@ HandPlayer.playActivePatterns = function() {
         for(var j = 0; j < LeapManager.INSTRUMENT_LIST.length; ++j) {
             var tones = activePattern.pattern[j][cIndex].tones;
             var lastTone = -1;
-            if(lastIndex >= 0) lastTone = this.getValidTone(activePattern.pattern[j][lastIndex].tones[activePattern.pattern[j][lastIndex].tones.length - 1]);
+            var channel = LeapManager.INSTRUMENT_LIST[j].channel;
+            if(lastIndex >= 0) lastTone = this.getValidTone(activePattern.pattern[j][lastIndex].tones[activePattern.pattern[j][lastIndex].tones.length - 1], channel);
             for(var k= 0; k < tones.length; ++k) {
-                this.playTone(this.getValidTone(tones[k]), lastTone, j, LeapManager.INSTRUMENT_LIST[j%LeapManager.INSTRUMENT_LIST.length].id);
+                this.playTone(this.getValidTone(tones[k], channel), lastTone, j, LeapManager.INSTRUMENT_LIST[j%LeapManager.INSTRUMENT_LIST.length].id);
             }
         }
     }
@@ -378,15 +377,6 @@ HandPlayer.processTones = function() {
     }*/
 
     this.recordPattern(LeapManager.handArray);
-
-    /*for(var i = 0; i < LeapManager.handArray.length; ++i) {
-        console.log("PLAYING TONE: " + LeapManager.handArray[i].currentTone);
-        if(LeapManager.handArray[i].currentTone !== null) {
-            this.playTone(HandPlayer.FIRST_NOTE_ID + LeapManager.handArray[i].currentTone, LeapManager.handArray[i].channel, LeapManager.INSTRUMENT_LIST[LeapManager.handArray[i].instrumentIndex].id);
-
-            LeapManager.handArray[i].currentTone = null;
-        }
-    }*/
 
     this.playActivePatterns();
     this.moveActivePatternsForward();

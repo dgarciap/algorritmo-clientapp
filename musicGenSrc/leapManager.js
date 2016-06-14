@@ -35,8 +35,8 @@ LeapManager.GRAB_THRESHOLD = 0.8;
 LeapManager.PINCH_THRESHOLD = 0.8;
 
 /**
- * Number of tones used, we will paint as many line intervals as tones, and this
- * will be the playable amount of tones.
+ * Number of tones used, we will paint as many line intervals as tones, but this
+ * won't be the playable amount of tones.
  */
 LeapManager.NUMBER_OF_TONES = 3*10;
 
@@ -44,30 +44,41 @@ LeapManager.NUMBER_OF_TONES = 3*10;
 //NOTE: Midi notes and semi-notes goes from 0 to 11. And if we want to specify octave, we 
 //      should calculate note + 12 * octave. (octaves goes from 0 to 9, both included).
 //Height of each semitone. There are 12 seminotes * 10 octaves.
-LeapManager.semitoneHeight = (LeapManager.maxValidHeight-LeapManager.minValidHeight)/(LeapManager.NUMBER_OF_TONES);
+LeapManager.semitonesHeight = (LeapManager.maxValidHeight-LeapManager.minValidHeight);
 
 
+//Variables numTones and firstToneId are used to split the playable height into
+//semitones and determine the current tone. But the visualization uses 
+//LeapManager.NUMBER_OF_TONES instead of this variables.
 LeapManager.INSTRUMENT_LIST = [
     {id: 0,
      name: "acoustic_grand_piano",
      color: "#fe40e0",
      unselectColor: "grey",
-     channel: 0},
+     channel: 0,
+     numTones: 4*12,
+     firstToneId: 21},
     {id: 114,
      name: "steel_drums",
      color: "#1efef6",
      unselectColor: "grey",
-     channel: 1},
+     channel: 1,
+     numTones: 4*12,
+     firstToneId: 21},
     {id: 33,
      name: "electric_bass_finger",
      color: "#febc1d",
      unselectColor: "grey",
-     channel: 2},
+     channel: 2,
+     numTones: 4*12,
+     firstToneId: 21},
     {id: 114,
      name: "steel_drums",
      color: "#8c54ff",
      unselectColor: "grey",
-     channel: 1}
+     channel: 3,
+     numTones: 4*12,
+     firstToneId: 21}
 ];
 
 //Array, for each hand we'll have an array.
@@ -123,7 +134,7 @@ LeapManager.adjustLeapValidArea = function() {
         this.minValidHeight = this.MIN_HEIGHT;
         this.maxValidHeight = this.MAX_HEIGHT;
     }
-    this.semitoneHeight = (this.maxValidHeight-this.minValidHeight)/(LeapManager.NUMBER_OF_TONES);
+    this.semitonesHeight = (this.maxValidHeight-this.minValidHeight);
 }
 
 
@@ -132,8 +143,9 @@ LeapManager.adjustLeapValidArea = function() {
  * @param  {float} palmHeight height at which the user placed its palm.
  * @return {int}            tone this height maps to.
  */
-LeapManager.getTone = function(palmHeight) {
-    var currentTone = parseInt(Math.max(palmHeight-LeapManager.minValidHeight, 0.1)/LeapManager.semitoneHeight);
+LeapManager.getTone = function(palmHeight, instrumentIndex) {
+    var semitoneHeight = LeapManager.semitonesHeight/LeapManager.INSTRUMENT_LIST[instrumentIndex].numTones;
+    var currentTone = parseInt(Math.max(palmHeight-LeapManager.minValidHeight, 0.1)/semitoneHeight);
     console.log("TONE: " + Math.min(currentTone, LeapManager.NUMBER_OF_TONES - 1));
     return Math.min(currentTone, LeapManager.NUMBER_OF_TONES - 1);
 }
@@ -213,6 +225,14 @@ LeapManager.getHandState = function(handId) {
     }
     return undefined;
 }
+
+LeapManager.getInstrumentFromChannel = function(channel) {
+    for(var i = 0; i < LeapManager.INSTRUMENT_LIST.length; ++i) {
+        if(LeapManager.INSTRUMENT_LIST[i].channel === channel) return i;
+    }
+    console.error("Error: There is no instrument with channel: "+  channel);
+    return -1;
+};
 
 /**
  * If the user is doing the gesture to throw spiderweb return true.
@@ -327,7 +347,7 @@ LeapManager.processHand = function(handFrame, handState, previousFrame) {
     //When grabbing the user is playing a tone.
     //Otherwise no tone is played.
     if(this.isGrabbing(handFrame) && this.isOnPlayingZone(palmWidth)) {
-        var tone = this.getTone(palmHeight);
+        var tone = this.getTone(palmHeight, handState.instrumentIndex);
         handState.currentTone = tone;
     }
     else {
