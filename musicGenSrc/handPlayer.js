@@ -15,6 +15,9 @@ HandPlayer.VELOCITY = 127;
 //How long to hold the note, in seconds.
 HandPlayer.DELAY = 0.031;
 
+//Each tick last 8 ticks.
+HandPlayer.NUMBER_TICKES_TONE = 8;
+
 //The first midi note id is:
 HandPlayer.FIRST_NOTE_ID = 21;
 
@@ -164,7 +167,25 @@ MIDI.loadPlugin({
  * tone in the MIDI format.
  */
 HandPlayer.getValidTone = function(rawTone) {
+    if(rawTone == -1) return rawTone;
     return rawTone * HandPlayer.TONE_GAP + HandPlayer.FIRST_NOTE_ID;
+}
+
+/**
+ * Get the total number of ticks that a given note is sustained in the given channel
+ * and index.
+ * @return {[type]} [description]
+ */
+HandPlayer.getTimes = function(track, toneIndex, lastTones) {
+    var offNote = track[toneIndex].tones[0];
+    var counter = 0;
+
+    for(var i = toneIndex; i >= 0; --i) {
+        if(track[i].tones[0] !== offNote) break;
+        else ++counter;
+    }
+
+    return counter*HandPlayer.NUMBER_TICKES_TONE; // Number of ticks per note.
 }
 
 
@@ -176,25 +197,30 @@ HandPlayer.getValidTone = function(rawTone) {
  *
  * wait is how much time we want to wait before playing the current note. 
  * (only when noteOn is true).
+ *
+ * NOTE: This is not prepared for cases where tones or lastTones have different
+ * number of tones than 1.
  */
-HandPlayer.addTonesToTrack = function(track, tones, channel, noteOn, wait) {
-    var time = 8; // Number of ticks per note.
+HandPlayer.addTonesToTrack = function(track, customTrack, toneIndex, tones, lastTones, channel, noteOn, wait) {
     wait = wait || 0;
     
     var isSilence = true;
     for(var i = 0; i < tones.length; ++i) {
-        if(tones[i] !== -1) {  
-            if(noteOn) {
+        if(noteOn) {
+            if(lastTones[0] !== tones[i] && tones[i] !== -1) {
                 //If first note.
                 if(isSilence) track.noteOn(channel, this.getValidTone(tones[i]), wait, HandPlayer.VELOCITY);
                 else track.noteOn(channel, this.getValidTone(tones[i]));
+                isSilence = false;
             }
-            else {
+        }
+        else {
+            if(lastTones[0] !== tones[i] && lastTones[0] !== -1) {
+                var numTicks = this.getTimes(customTrack, toneIndex - 1, lastTones);
                 //If first note.
-                if(isSilence) track.noteOff(channel, this.getValidTone(tones[i]), time);
-                else track.noteOff(channel, this.getValidTone(tones[i]));
+                if(isSilence) track.noteOff(channel, this.getValidTone(lastTones[0]), numTicks);
+                else track.noteOff(channel, this.getValidTone(lastTones[0]));
             }
-             isSilence = false;
         }
     }
     return !isSilence;
@@ -206,12 +232,13 @@ HandPlayer.fillTrackWithArray = function(track, trackArray) {
     var wait = 0;
     for(var j = 0; trackArray[0] && j < trackArray[0].length; ++j) {
         var areTones = false;
+
         for(var i = 0; i < trackArray.length; ++i) 
-            areTones = this.addTonesToTrack(track, trackArray[i][j].tones, i, true, wait) || areTones;
+            this.addTonesToTrack(track, trackArray[i], j, trackArray[i][j].tones, j == 0 ? [-1] : trackArray[i][j-1].tones, i, false);
         for(var i = 0; i < trackArray.length; ++i) 
-            areTones = this.addTonesToTrack(track, trackArray[i][j].tones, i, false) || areTones;
+            areTones = this.addTonesToTrack(track, trackArray[i], j, trackArray[i][j].tones, j == 0 ? [-1] : trackArray[i][j-1].tones, i, true, wait) || areTones;
         
-        if(!areTones) wait += 128;
+        if(!areTones) wait += HandPlayer.NUMBER_TICKES_TONE;
         else wait = 0;
     }
 }
@@ -306,20 +333,26 @@ HandPlayer.playActivePatterns = function() {
     for(var i = 0; i < this.activePatterns.length; ++i) {
         var activePattern = this.activePatterns[i];
         cIndex = activePattern.index;
+        lastIndex = activePattern.index - 1;
         for(var j = 0; j < LeapManager.INSTRUMENT_LIST.length; ++j) {
             var tones = activePattern.pattern[j][cIndex].tones;
-            for(var k= 0; k < tones-length; ++k) {
-                this.playTone(this.getValidTone(tones[k]), j, LeapManager.INSTRUMENT_LIST[j%LeapManager.INSTRUMENT_LIST.length].id);
+            var lastTone = -1;
+            if(lastIndex >= 0) lastTone = this.getValidTone(activePattern.pattern[j][lastIndex].tones[activePattern.pattern[j][lastIndex].tones.length - 1]);
+            for(var k= 0; k < tones.length; ++k) {
+                this.playTone(this.getValidTone(tones[k]), lastTone, j, LeapManager.INSTRUMENT_LIST[j%LeapManager.INSTRUMENT_LIST.length].id);
             }
         }
     }
 }
 
 
-HandPlayer.playTone = function(tone, channel, instrument) {
+HandPlayer.playTone = function(tone, lastTone, channel, instrument) {
     MIDI.programChange(channel, instrument);
-    MIDI.noteOn(channel, tone, HandPlayer.VELOCITY);
-    MIDI.noteOff(channel, tone, HandPlayer.DELAY);
+    if(lastTone !== tone) {
+        if(lastTone >= 0) MIDI.noteOff(channel, lastTone, 0);
+        MIDI.noteOn(channel, tone, HandPlayer.VELOCITY);
+    }
+    //MIDI.noteOff(channel, tone, HandPlayer.DELAY);
 }
 
 HandPlayer.RENDERS_PER_SECOND = 4;
