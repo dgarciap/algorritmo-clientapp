@@ -5,15 +5,15 @@
 var HandPlayer = {};
 
 //Constant containing time between tones.
-HandPlayer.INTERVAL_TIME = 300;
-HandPlayer.TEMPO = 200; //beats per minute.
+HandPlayer.INTERVAL_TIME = 31;
+HandPlayer.TEMPO = 120; //beats per minute.
 
-HandPlayer.NUM_TONES_PATTERN = 40;
+HandPlayer.NUM_TONES_PATTERN = 384;
 
 //How hard the note hits, from 0-127.
 HandPlayer.VELOCITY = 127;
 //How long to hold the note, in seconds.
-HandPlayer.DELAY = 0.5;
+HandPlayer.DELAY = 0.031;
 
 //The first midi note id is:
 HandPlayer.FIRST_NOTE_ID = 21;
@@ -178,7 +178,7 @@ HandPlayer.getValidTone = function(rawTone) {
  * (only when noteOn is true).
  */
 HandPlayer.addTonesToTrack = function(track, tones, channel, noteOn, wait) {
-    var time = 128;
+    var time = 8; // Number of ticks per note.
     wait = wait || 0;
     
     var isSilence = true;
@@ -322,6 +322,13 @@ HandPlayer.playTone = function(tone, channel, instrument) {
     MIDI.noteOff(channel, tone, HandPlayer.DELAY);
 }
 
+HandPlayer.RENDERS_PER_SECOND = 4;
+
+//Countdown to determine when to render.
+//We are playing 32 tones per second and we don't want to render so many times.
+//We'll render each 32/HandPlayer.RENDERS_PER_SECOND tones.
+HandPlayer.renderCountdown = 32/HandPlayer.RENDERS_PER_SECOND;
+
 /**
  * When invoke iterate over all registered hands and for each of this hands if
  * it has a toned assigned plays this tones and marks it as played.
@@ -329,6 +336,8 @@ HandPlayer.playTone = function(tone, channel, instrument) {
  */
 HandPlayer.processTones = function() {
     if(!this.midiStreamerLoaded) return false;
+
+    --HandPlayer.renderCountdown;
 
     /*if(this.isRecording()) {
         this.record(LeapManager.handArray, this.recordingArray);
@@ -349,7 +358,10 @@ HandPlayer.processTones = function() {
     this.playActivePatterns();
     this.moveActivePatternsForward();
 
-    MakerViz.render(LeapManager.handArray[0] ? LeapManager.handArray[0].currentTone : null);
+    if(HandPlayer.renderCountdown === 0) {
+        HandPlayer.renderCountdown = 32/HandPlayer.RENDERS_PER_SECOND;
+        MakerViz.render(LeapManager.handArray[0] ? LeapManager.handArray[0].currentTone : null);
+    }
 
     return true;
 }

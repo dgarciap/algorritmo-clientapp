@@ -357,26 +357,26 @@ MakerViz.printRecordedInstruments = function() {
         lContainer.select(".line")
             .classed("opaque-pattern", this.isCurrentColor(inst) ? false : true)
             .datum(pattern[inst] || [])
-              .transition()
+              .transition(150)
                 .attr("d", line)
                 .style("stroke", color);
         lContainer.select(".area")
             .classed("opaque-pattern", this.isCurrentColor(inst) ? false : true)
             .datum(pattern[inst] || [])
-              .transition()
+              .transition(150)
                 .attr("d", area)
                 .style("fill", color);
 
         lContainer.select(".inverse-line")
             .classed("opaque-pattern", this.isCurrentColor(inst) ? false : true)
             .datum(pattern[inst] || [])
-              .transition()
+              .transition(150)
                 .attr("d", lineInverse)
                 .style("stroke", color);
         lContainer.select(".inverse-area")
             .classed("opaque-pattern", this.isCurrentColor(inst) ? false : true)
             .datum(pattern[inst] || [])
-              .transition()
+              .transition(150)
                 .attr("d", areaInverse)
                 .style("fill", color);
 
@@ -408,15 +408,18 @@ MakerViz.printPattern = function(instrumentBarContainer) {
     var barGroup = d3.select(".tempo-line-group");
     if(barGroup.size() !== 0) {
         barGroup.select(".shader-rect")
-            .transition()
+            .transition(1000/HandPlayer.RENDERS_PER_SECOND)
+            .ease("linear")
                 .attr("width", coef * (window.innerWidth - MakerViz.PROGRESS_BAR_WMARGIN))
                 .attr("height", HandPlayer.activePatterns[0].pattern.length * (MakerViz.PROGRESS_BAR_HEIGHT + MakerViz.MARGIN_BETWEEN_BARS*2));
         barGroup.select(".tempo-line")
-            .transition()
+            .transition(1000/HandPlayer.RENDERS_PER_SECOND)
+            .ease("linear")
                 .attr("x1", coef * (window.innerWidth - MakerViz.PROGRESS_BAR_WMARGIN))
                 .attr("x2", coef * (window.innerWidth - MakerViz.PROGRESS_BAR_WMARGIN));
         barGroup.select(".counter")
-            .transition()
+            .transition(1000/HandPlayer.RENDERS_PER_SECOND)
+            .ease("linear")
                 .attr("x", coef * (window.innerWidth - MakerViz.PROGRESS_BAR_WMARGIN))
                 .text(HandPlayer.activePatterns[0].index);
     }
