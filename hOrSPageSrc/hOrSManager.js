@@ -4,7 +4,7 @@ HorSManager.shitIcon = document.getElementById("shiticon");
 HorSManager.hitIcon = document.getElementById("hiticon");
 HorSManager.songtime = document.getElementById("songtime");
 
-HorSManager.swipeTime= 0;  // If < 0 dialog mode on, the number is the timestamp of the time the dialog gets active
+HorSManager.swipeTime = 0;  // If < 0 dialog mode on, the number is the timestamp of the time the dialog gets active
 
 /**
  * This method is in charge of going to the remote server and retrieve a track
