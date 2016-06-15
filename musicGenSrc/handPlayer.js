@@ -225,24 +225,23 @@ HandPlayer.addTonesToTrack = function(track, customTrack, toneIndex, tones, last
 }
 
 
-HandPlayer.fillTrackWithArray = function(track, trackArray) {
-    var modifiedTrack = track;
-    var wait = 0;
-    for(var j = 0; trackArray[0] && j < trackArray[0].length; ++j) {
-        var areTones = false;
+HandPlayer.fillTrackWithArray = function(tracks, trackArray) {
+    for(var i = 0; i < trackArray.length; ++i) {
+        var wait = 0;
+        for(var j = 0; trackArray[0] && j < trackArray[0].length; ++j) {
+            var areTones = false;
 
-        for(var i = 0; i < trackArray.length; ++i) 
-            this.addTonesToTrack(track, trackArray[i], j, trackArray[i][j].tones, j == 0 ? [-1] : trackArray[i][j-1].tones, i, false);
-        for(var i = 0; i < trackArray.length; ++i) 
-            areTones = this.addTonesToTrack(track, trackArray[i], j, trackArray[i][j].tones, j == 0 ? [-1] : trackArray[i][j-1].tones, i, true, wait) || areTones;
-        
-        if(!areTones) wait += HandPlayer.NUMBER_TICKES_TONE;
-        else wait = 0;
+            this.addTonesToTrack(tracks[i], trackArray[i], j, trackArray[i][j].tones, j == 0 ? [-1] : trackArray[i][j-1].tones, i, false);
+            areTones = this.addTonesToTrack(tracks[i], trackArray[i], j, trackArray[i][j].tones, j == 0 ? [-1] : trackArray[i][j-1].tones, i, true, wait) || areTones;
+            
+            if(!areTones) wait += HandPlayer.NUMBER_TICKES_TONE;
+            else wait = 0;
+        }
     }
 
     //NoteOff the last notes if they are not silence.
     for(var i = 0; i < trackArray.length; ++i) 
-            this.addTonesToTrack(track, trackArray[i], trackArray[0].length-1, [-2], trackArray[i][trackArray[0].length-1].tones, i, false);
+            this.addTonesToTrack(tracks[i], trackArray[i], trackArray[0].length-1, [-2], trackArray[i][trackArray[0].length-1].tones, i, false);
 }
 
 
@@ -250,21 +249,21 @@ HandPlayer.generateMidiFile = function() {
     this.recordEnabled = false;
 
     var file = new Midi.File();
-    var track = new Midi.Track();
-    file.addTrack(track);
-
-    track.setTempo(this.TEMPO);
+    var tracks = [];
 
     for(var i = 0; i < LeapManager.INSTRUMENT_LIST.length; ++i) {
+        var track = new Midi.Track();
+        file.addTrack(track);
+        track.setTempo(this.TEMPO);
         track.setInstrument(i, LeapManager.INSTRUMENT_LIST[i].id);
-        track.setInstrument(i+LeapManager.INSTRUMENT_LIST.length, LeapManager.INSTRUMENT_LIST[i].id);
+        tracks[tracks.length] = track;
     }
 
     //TODO: Erase.
     //fakeArray = [];
     //fakeArray[fakeArray.length] = [{id: 21, numTimes:2000}];
 
-    this.fillTrackWithArray(track, this.activePatterns[0].pattern);
+    this.fillTrackWithArray(tracks, this.activePatterns[0].pattern);
     //fillTrackWithArray(track, fakeArray);
 
     var str = file.toBytes();
