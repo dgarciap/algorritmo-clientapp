@@ -8,7 +8,7 @@ var HandPlayer = {};
 HandPlayer.INTERVAL_TIME = 31;
 HandPlayer.TEMPO = 120; //beats per minute.
 
-HandPlayer.NUM_TONES_PATTERN = 384;
+HandPlayer.NUM_TONES_PATTERN = 200;
 
 //How hard the note hits, from 0-127.
 HandPlayer.VELOCITY = 127;
@@ -239,6 +239,10 @@ HandPlayer.fillTrackWithArray = function(track, trackArray) {
         if(!areTones) wait += HandPlayer.NUMBER_TICKES_TONE;
         else wait = 0;
     }
+
+    //NoteOff the last notes if they are not silence.
+    for(var i = 0; i < trackArray.length; ++i) 
+            this.addTonesToTrack(track, trackArray[i], trackArray[0].length-1, [-2], trackArray[i][trackArray[0].length-1].tones, i, false);
 }
 
 
@@ -331,7 +335,7 @@ HandPlayer.playActivePatterns = function() {
     for(var i = 0; i < this.activePatterns.length; ++i) {
         var activePattern = this.activePatterns[i];
         cIndex = activePattern.index;
-        lastIndex = activePattern.index - 1;
+        lastIndex = activePattern.index > 0 ? activePattern.index - 1 : activePattern.pattern[0].length-1;
         for(var j = 0; j < LeapManager.INSTRUMENT_LIST.length; ++j) {
             var tones = activePattern.pattern[j][cIndex].tones;
             var lastTone = -1;

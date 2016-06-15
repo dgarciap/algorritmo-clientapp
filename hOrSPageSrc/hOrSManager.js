@@ -52,8 +52,9 @@ HorSManager.loadTrack = function() {
             //If end of song, start playing from the beginning.
             if(data.now === data.end) {
                    console.log("End of the song.");
-                   MIDI.Player.stop();
-                   MIDI.Player.start();
+                   setInterval(function(){MIDI.Player.pause();MIDI.Player.stop();MIDI.Player.start();}, 10);
+                   /*MIDI.Player.stop();
+                   MIDI.Player.start();*/
             }
             HorSManager.visUpdater(data.note);
             console.log(data.velocity);
