@@ -41,7 +41,7 @@ MouseManager.mouseoverBehaviour = function() {
     MouseManager.processMouseOver(d3.event, fakeHandState);
 
     if(MouseManager.pressed && MusicGenGlobal.isFinishPressed(MouseManager.getPositionPercentage(d3.event))) {
-        if(MakerViz.isFinishLocked()) MakerViz.showFinishWarning();
+        if(HandPlayer.isFinishLocked()) MakerViz.showFinishWarning();
         else MusicGenGlobal.finishComposition();
     }
 };

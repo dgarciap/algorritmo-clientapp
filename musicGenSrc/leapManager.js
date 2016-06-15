@@ -410,7 +410,7 @@ Leap.loop(controllerOptions, function(frame) {
 
     if(LeapManager.isClapping(frame.hands) || 
         MusicGenGlobal.isFinishPressed(this.getPositionPercentage(handFrame))) {
-            if(MakerViz.isFinishLocked()) MakerViz.showFinishWarning();
+            if(HandPlayer.isFinishLocked()) MakerViz.showFinishWarning();
             else MusicGenGlobal.finishComposition();
         }
 

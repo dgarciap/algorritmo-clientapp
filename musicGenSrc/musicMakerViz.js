@@ -412,18 +412,19 @@ MakerViz.printPattern = function(instrumentBarContainer) {
         barGroup.select(".shader-rect")
             .transition(1000/HandPlayer.RENDERS_PER_SECOND)
             .ease("linear")
-                .attr("width", coef * (window.innerWidth - MakerViz.PROGRESS_BAR_WMARGIN))
+                .attr("x", coef * (window.innerWidth - MakerViz.PROGRESS_BAR_WMARGIN*2))
+                .attr("width", (1-coef) * (window.innerWidth - MakerViz.PROGRESS_BAR_WMARGIN*2))
                 .attr("height", HandPlayer.activePatterns[0].pattern.length * (MakerViz.PROGRESS_BAR_HEIGHT + MakerViz.MARGIN_BETWEEN_BARS*2));
         barGroup.select(".tempo-line")
             .transition(1000/HandPlayer.RENDERS_PER_SECOND)
             .ease("linear")
-                .attr("x1", coef * (window.innerWidth - MakerViz.PROGRESS_BAR_WMARGIN))
-                .attr("x2", coef * (window.innerWidth - MakerViz.PROGRESS_BAR_WMARGIN));
+                .attr("x1", coef * (window.innerWidth - MakerViz.PROGRESS_BAR_WMARGIN*2))
+                .attr("x2", coef * (window.innerWidth - MakerViz.PROGRESS_BAR_WMARGIN*2));
         
         barGroup.select(".counter")
             .transition(1000/HandPlayer.RENDERS_PER_SECOND)
             .ease("linear")
-                .attr("x", coef * (window.innerWidth - MakerViz.PROGRESS_BAR_WMARGIN))
+                .attr("x", coef * (window.innerWidth - MakerViz.PROGRESS_BAR_WMARGIN*2))
                 .text(currentSecond);
     }
     else {
@@ -433,21 +434,21 @@ MakerViz.printPattern = function(instrumentBarContainer) {
 
         barGroup.append("rect")
             .attr("class", "shader-rect")
-            .attr("x", 0)
+            .attr("x", coef * (window.innerWidth - MakerViz.PROGRESS_BAR_WMARGIN*2))
             .attr("y", 0)
-            .attr("width", coef * (window.innerWidth - MakerViz.PROGRESS_BAR_WMARGIN))
+            .attr("width", (1-coef) * (window.innerWidth - MakerViz.PROGRESS_BAR_WMARGIN*2))
             .attr("height", HandPlayer.activePatterns[0].pattern.length * (MakerViz.PROGRESS_BAR_HEIGHT + MakerViz.MARGIN_BETWEEN_BARS*2));
 
         barGroup.append("svg:line")
-            .attr("x1", coef * (window.innerWidth - MakerViz.PROGRESS_BAR_WMARGIN))
+            .attr("x1", coef * (window.innerWidth - MakerViz.PROGRESS_BAR_WMARGIN*2))
             .attr("y1", 0)
-            .attr("x2", coef * (window.innerWidth - MakerViz.PROGRESS_BAR_WMARGIN))
+            .attr("x2", coef * (window.innerWidth - MakerViz.PROGRESS_BAR_WMARGIN*2))
             .attr("y2", HandPlayer.activePatterns[0].pattern.length * (MakerViz.PROGRESS_BAR_HEIGHT + MakerViz.MARGIN_BETWEEN_BARS*2))
             .attr("class","tempo-line");
 
         barGroup.append("text")
             .attr("class", "counter")
-            .attr("x", coef * (window.innerWidth - MakerViz.PROGRESS_BAR_WMARGIN))
+            .attr("x", coef * (window.innerWidth - MakerViz.PROGRESS_BAR_WMARGIN*2))
             .attr("y", -5)
             .text(currentSecond);
     }
