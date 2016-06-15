@@ -28,23 +28,24 @@ HorSManager.removeLocalStorageTrack = function() {
     localStorage.removeItem("userGeneratedSong");
 };
 
+HorSManager.currentTrack = undefined;
+
 /**
  * Load the track that the user is going to vote, and start playing it in a loop.
  */
 HorSManager.loadTrack = function() {
-    var track;
     if(this.isTrackInLocalStorage()) {
-        track = this.getLocalStorageTrack();
+        this.currentTrack = this.getLocalStorageTrack();
         this.removeLocalStorageTrack();
     }
-    else track = this.getTrackFromRemoteServer();
+    else this.currentTrack = this.getTrackFromRemoteServer();
 
     //Set Instruments in appropriate channels.
     for(var i = 0; i < LeapManager.INSTRUMENT_LIST.length; ++i) {
         MIDI.programChange(i, LeapManager.INSTRUMENT_LIST[i].id);
     }
 
-    HorSManager.loadTrackToMidiPlayer(track);
+    HorSManager.loadTrackToMidiPlayer(this.currentTrack);
 };
 
 HorSManager.loadTrackToMidiPlayer = function(track) {
@@ -101,9 +102,19 @@ HorSManager.goToPreviousPage = function() {
 HorSManager.hitPressed = function() {
     this.swipeTime= Date.now();
     this.activate(this.hitIcon, this.shitIcon);
-    setTimeout(this.showSendingMsg.bind(this), 800);
-    setTimeout(this.hideMsg.bind(this), 2000);
     MIDI.Player.stop();
+    setTimeout(this.sendCurrentTrack.bind(this), 800);
+};
+
+HorSManager.sendCurrentTrack = function() {
+    if(this.currentTrack) {
+        this.showSendingMsg();
+        //setTimeout(this.hideMsg.bind(this), 2000);
+        this.serverRequestSaveSong();
+    }
+    else {
+        console.error("ERROR: There is no current track.")
+    }
 };
 
 HorSManager.shitPressed = function() {
@@ -163,4 +174,16 @@ HorSManager.hideMsg = function(){
     d3.select(".img-div").style("display", "none");
     msgpopup.style.display= 'none';
     listeningwrapper.style.visibility= 'visible';
+}
+
+HorSManager.serverRequestSaveSong = function(){
+
+    var oReq = new XMLHttpRequest();
+    oReq.open("POST", "save-song");
+    //oReq.setRequestHeader("Access-Control-Allow-Origin", "*");
+    oReq.addEventListener("load", function(event) {
+        console.log('SAVED SONG: '+oReq.responseText);
+        HorSManager.goToPreviousPage();
+    });
+    oReq.send(this.currentTrack);
 }
