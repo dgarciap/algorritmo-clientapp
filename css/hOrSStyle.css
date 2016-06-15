@@ -1,3 +1,9 @@
+@font-face {
+  font-family: Aller Regular;
+  src: local("Aller Regular"),
+       url(../fonts/Aller_Rg.ttf);
+}
+
 a { text-decoration: none; color: #352521; }
 a:visited { }
 a:hover,a:focus { text-decoration: underline; }
@@ -16,11 +22,11 @@ a.uplink{ display:block;}
 
 body {  font-family: 'Ubuntu', sans-serif;
          margin: 0; padding: 0; color: #000;
-     
+        overflow:hidden;
 
        /*background: url(imgs/zigzag.png) 0 0 repeat; */}
 
-div#top{ font-size: .9em; padding: 12px ;    }
+div#top{ font-size: .9em;    }
 div#top img{ vertical-align: middle;      }
 
 #top{
@@ -38,7 +44,6 @@ div#top img{ vertical-align: middle;      }
  background-color: #f7f7ed;
  border-top: 1px solid #EEE;
  padding-top: 22px;padding-bottom: 80px;
- box-shadow: 16px 10px 3px #E0E0E0;
 }
 
 #drawingCanvas{
@@ -54,6 +59,7 @@ div#top img{ vertical-align: middle;      }
   margin: 0 auto;
   background-color: #f7f7ed;
   box-shadow: 16px 10px 3px #E0E0E0;
+  height: 100vh;
 }
 
 div#songtime{width: 400px; margin: 0 auto; padding-top: 0px; color: orangered; font-size: 10px; font-weight: bold;height: 400px;font-family: sans-serif;}
@@ -134,4 +140,22 @@ div#hit{
 100% {
   -webkit-transform: scale(2);
  }
+}
+
+.subtitle {
+    height: 50px;
+    width: 100%;
+    font-size: 36px;
+    font-family: "Aller Regular", Calibri;
+    background: #f7f7ed;
+    text-align: center;
+    color: #4d4d4d;
+}
+
+
+.img-div {
+    width: 100vw;
+    height: 100vh;
+    background: #f7f7ed;
+    display: none;
 }

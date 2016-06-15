@@ -13,7 +13,7 @@
 }*/
 
 HorSManager.goToPreviousPage = function () {
-    window.location.href = window.location.pathname;
+    window.location.href = "/";
 };
 
 HorSManager.visUpdater = startVisualization("songtime");
@@ -27,6 +27,10 @@ MIDI.loadPlugin({
         console.log(state, progress);
     },
 });
+
+d3.select("#hit").on("click", HorSManager.hitPressed.bind(HorSManager));
+
+d3.select("#shit").on("click", HorSManager.shitPressed.bind(HorSManager));
 
 //Load a song and start playing it.
 //HorSManager.loadTrack();

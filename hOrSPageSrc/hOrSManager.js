@@ -98,51 +98,60 @@ HorSManager.goToPreviousPage = function() {
         " when the user finish its interaction with HorSPage.");
 };
 
+HorSManager.hitPressed = function() {
+    this.swipeTime= Date.now();
+    this.activate(this.hitIcon, this.shitIcon);
+    setTimeout(this.showSendingMsg.bind(this), 800);
+    setTimeout(this.hideMsg.bind(this), 2000);
+    MIDI.Player.stop();
+};
+
+HorSManager.shitPressed = function() {
+    this.swipeTime= Date.now();
+    this.activate(this.shitIcon, this.hitIcon);
+    MIDI.Player.stop();
+
+    //TODO: Send the user vote to the server.
+    //serverRequestSaveSong();
+    setTimeout(this.goToPreviousPage.bind(this),500);
+};
+
 HorSManager.listeningPage = function(frame) {
     var hand= frame.hands[0];
 
     if (frame.hands.length > 0){ // Any hand detected
 
-    if (Date.now() - this.swipeTime > 1000){
-    // console.log("palmVelocity: "+hand.palmVelocity[0]);
+        if (Date.now() - this.swipeTime > 1000){
+        // console.log("palmVelocity: "+hand.palmVelocity[0]);
 
-        if (hand.palmVelocity[0] < -800){  // console.log("L SWIPE Event");
-           this.swipeTime= Date.now();
-           this.activate(this.shitIcon, this.hitIcon);
+            if (hand.palmVelocity[0] < -800){  // console.log("L SWIPE Event");
+                this.shitPressed();
+            }
+            else  if (hand.palmVelocity[0] > 800){  // console.log("R SWIPE Event");
+                this.hitPressed();
+            }
+            this.songtime.innerHTML= "HAND";
 
-           MIDI.Player.stop();
-           //TODO: Send the user vote to the server.
-           //serverRequestSaveSong();
-           setTimeout(this.goToPreviousPage.bind(this),500);
-          }else  if (hand.palmVelocity[0] > 800){  // console.log("R SWIPE Event");
-            this.swipeTime= Date.now();
-            this.activate(this.hitIcon, this.shitIcon);
-            setTimeout(this.showSendingMsg.bind(this), 800);
-            setTimeout(this.hideMsg.bind(this), 2000);
-            MIDI.Player.stop();
-            //TODO: Send the user vote to the server.
-            //serverRequestSaveSong();
-            setTimeout(this.goToPreviousPage.bind(this), 2000);//setTimeout(hideMsg,2000);
-         }
         }
-        this.songtime.innerHTML= "HAND";
-
+        else{  // No hand detected
+            this.songtime.innerHTML= 'NO HAND';
+            this.shitIcon.className= "init";
+            this.hitIcon.className= "init";
+        }
     }
-    else{  // No hand detected
-        this.songtime.innerHTML= 'NO HAND';
-        this.shitIcon.className= "init";
-        this.hitIcon.className= "init";
-    }
-}
+};
 
 HorSManager.showMsg = function(src){
     console.log("showMsg");
+    var imageDiv = d3.select(".img-div");
     msgpopup.setAttribute('src',src);
     msgpopup.style.left =  ((document.body.clientWidth - msgpopup.width)/2) +'px';
     msgpopup.style.top= ((document.body.clientHeight - msgpopup.height)/2)+'px';
 
     msgpopup.style.display= 'block';
     listeningwrapper.style.visibility= 'hidden';
+
+    imageDiv.style("display", "block");
     //outOfFlow= false;
 }
 
@@ -151,6 +160,7 @@ HorSManager.showSendingMsg = function(){
 }
 
 HorSManager.hideMsg = function(){
+    d3.select(".img-div").style("display", "none");
     msgpopup.style.display= 'none';
     listeningwrapper.style.visibility= 'visible';
 }
