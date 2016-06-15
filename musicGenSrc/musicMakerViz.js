@@ -526,7 +526,7 @@ MakerViz.printLegend = function(numLines, totalHeight) {
         .text("Treble");
 
     legendContainer.append("svg:image")
-        .attr("xlink:href", "imgs/clef.png")
+        .attr("xlink:href", ResHelper.getResPath() + "/imgs/clef.png")
         .attr("x", legendWidth/4)
         .attr("y", (totalHeight-lineHeight)/2-legendWidth/2)
         .attr("height", "100%")
@@ -664,7 +664,7 @@ MakerViz.drawIndications = function() {
         .attr("transform", "translate("+ window.innerWidth/3 +"," + window.innerHeight/3 + ")");
     
     infoGroup.append("image")
-        .attr("href", "imgs/click.png")
+        .attr("href", ResHelper.getResPath() + "/imgs/click.png")
         .attr("class", "main-info-img")
         .attr("width", window.innerWidth/8)
         .attr("height", window.innerWidth/8)

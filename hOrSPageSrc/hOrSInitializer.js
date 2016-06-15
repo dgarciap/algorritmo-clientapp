@@ -13,14 +13,14 @@
 }*/
 
 HorSManager.goToPreviousPage = function () {
-    window.location.href = "/";
+    window.location.href = ResHelper.getMainUrl();
 };
 
 HorSManager.visUpdater = startVisualization("songtime");
 
 //Load Midi streamer
 MIDI.loadPlugin({
-    soundfontUrl: "./soundfonts/",
+    soundfontUrl: ResHelper.getResPath() + "/soundfonts/",
     instruments: _.map(LeapManager.INSTRUMENT_LIST, function(item){return item.name;}),
     onsuccess: HorSManager.loadTrack.bind(HorSManager),
     onprogress: function(state, progress) {

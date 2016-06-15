@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <title>Music Generator</title>
+        <link rel="stylesheet" type="text/css" href="css/music-creator-style.css">
+    </head>
+    <body oncontextmenu="return false;">
+        <img class="logo" src="imgs/algorritmo-logo.jpg"/>
+        <div class="subtitle" src="imgs/algorritmo-logo.jpg"/>
+            <p>Compose your own song!</p>
+        </div>
+        <div id="svg-container"></div>
+    </body>
+
+    <script src="http://js.leapmotion.com/leap-0.6.3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.16/d3.js"></script>
+    <script src="libs/underscore-min.js"></script>
+    <script src="libs/MIDI.js"></script>
+    <script src="customLibs/MIDI-CHANGES.js"></script>
+    <script src="libs/jsmidgen.js"></script>
+
+    <script src="resourcesHelper.js"></script>
+
+    <!-- Particle manager dependencies -->
+    <script src="libs/three.js"></script>
+    <script src="libs/GPUParticleSystem.js" charset="utf-8"></script>
+
+    <script src="musicGenSrc/leapManager.js"></script>
+    <script src="musicGenSrc/handPlayer.js"></script>
+    <script src="musicGenSrc/musicMakerViz.js"></script>
+    <script src="musicGenSrc/particleManager.js" charset="utf-8"></script>
+    <script src="commonSrc/commonGestureManagement.js"></script>
+    <script src="musicGenSrc/mouseManager.js"></script>
+    <script src="musicGenSrc/initializer.js"></script>
+</html>

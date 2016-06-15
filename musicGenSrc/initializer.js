@@ -67,7 +67,7 @@ MusicGenGlobal.finishComposition = function() {
     HandPlayer.generateMidiFile();
 
     //Go to vote page.
-    window.location.href = window.location.pathname + 'index_HorS.html';
+    window.location.href = ResHelper.getHorSUrl();
 };
 
 MakerViz.adjustSVGArea();

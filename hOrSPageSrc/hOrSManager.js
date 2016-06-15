@@ -156,7 +156,7 @@ HorSManager.showMsg = function(src){
 }
 
 HorSManager.showSendingMsg = function(){
-    this.showMsg('imgs/hOrS/sendingmsg.jpg');
+    this.showMsg(ResHelper.getResPath() + '/imgs/hOrS/sendingmsg.jpg');
 }
 
 HorSManager.hideMsg = function(){

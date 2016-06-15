@@ -150,7 +150,7 @@ HandPlayer.isRecording = function() {
 
 //Load Midi streamer
 MIDI.loadPlugin({
-    soundfontUrl: "./soundfonts/",
+    soundfontUrl: ResHelper.getResPath() + "/soundfonts/",
     instruments: _.map(LeapManager.INSTRUMENT_LIST, function(item){return item.name;}),
     onsuccess: onsuccess,
     onprogress: function(state, progress) {
