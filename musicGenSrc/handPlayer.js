@@ -292,7 +292,7 @@ HandPlayer.generateMidiFile = function() {
         console.log("Error generating MIDI file.");
     }); // load .MIDI from base64 or binary XML request.*/
 
-    this.downloadSong(base64String);
+    //this.downloadSong(base64String);
     this.saveSongUsingLocalStorage(base64String);
 }
 

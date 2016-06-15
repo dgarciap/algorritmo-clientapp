@@ -44,7 +44,12 @@ HorSManager.loadTrack = function() {
         MIDI.programChange(i, LeapManager.INSTRUMENT_LIST[i].id);
     }
 
+    HorSManager.loadTrackToMidiPlayer(track);
+};
+
+HorSManager.loadTrackToMidiPlayer = function(track) {
     //Player.
+    //MIDI.Player.BPM = 120;
     MIDI.Player.loadFile(track, function() {
         console.log("MIDI file loaded.");
         //TODO: Differences between MIDI.Player.addListener and MIDI.Player.addAnimation
@@ -52,7 +57,8 @@ HorSManager.loadTrack = function() {
             //If end of song, start playing from the beginning.
             if(data.now === data.end) {
                    console.log("End of the song.");
-                   setInterval(function(){MIDI.Player.pause();MIDI.Player.stop();MIDI.Player.start();}, 10);
+
+                   setTimeout(function(){HorSManager.loadTrackToMidiPlayer(track);}, 2000);
                    /*MIDI.Player.stop();
                    MIDI.Player.start();*/
             }
