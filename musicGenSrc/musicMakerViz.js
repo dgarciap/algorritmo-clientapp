@@ -403,6 +403,10 @@ MakerViz.printPattern = function(instrumentBarContainer) {
 
     var coef = percentage/100;
 
+    var currentSecond = Math.floor(HandPlayer.activePatterns[0].index*HandPlayer.INTERVAL_TIME/1000);
+    if(currentSecond <= 9) currentSecond = "0" + currentSecond;
+    currentSecond = "00:" + currentSecond;
+
     var barGroup = d3.select(".tempo-line-group");
     if(barGroup.size() !== 0) {
         barGroup.select(".shader-rect")
@@ -415,11 +419,12 @@ MakerViz.printPattern = function(instrumentBarContainer) {
             .ease("linear")
                 .attr("x1", coef * (window.innerWidth - MakerViz.PROGRESS_BAR_WMARGIN))
                 .attr("x2", coef * (window.innerWidth - MakerViz.PROGRESS_BAR_WMARGIN));
+        
         barGroup.select(".counter")
             .transition(1000/HandPlayer.RENDERS_PER_SECOND)
             .ease("linear")
                 .attr("x", coef * (window.innerWidth - MakerViz.PROGRESS_BAR_WMARGIN))
-                .text(HandPlayer.activePatterns[0].index);
+                .text(currentSecond);
     }
     else {
         barGroup = instrumentBarContainer.append("g")
@@ -444,7 +449,7 @@ MakerViz.printPattern = function(instrumentBarContainer) {
             .attr("class", "counter")
             .attr("x", coef * (window.innerWidth - MakerViz.PROGRESS_BAR_WMARGIN))
             .attr("y", -5)
-            .text(HandPlayer.activePatterns[0].index);
+            .text(currentSecond);
     }
 
     var barMargin = 25;
