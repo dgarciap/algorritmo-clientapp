@@ -354,28 +354,32 @@ MakerViz.printRecordedInstruments = function() {
                 .style("stroke", color);
         }
 
+        var scaledPatterns = _.map(pattern[inst] || [], function(item) {
+            return {tones: [item.tones[0]*LeapManager.NUMBER_OF_TONES/LeapManager.INSTRUMENT_LIST[inst].numTones]};
+        });
+
         lContainer.select(".line")
             .classed("opaque-pattern", this.isCurrentColor(inst) ? false : true)
-            .datum(pattern[inst] || [])
+            .datum(scaledPatterns)
               .transition(150)
                 .attr("d", line)
                 .style("stroke", color);
         lContainer.select(".area")
             .classed("opaque-pattern", this.isCurrentColor(inst) ? false : true)
-            .datum(pattern[inst] || [])
+            .datum(scaledPatterns)
               .transition(150)
                 .attr("d", area)
                 .style("fill", color);
 
         lContainer.select(".inverse-line")
             .classed("opaque-pattern", this.isCurrentColor(inst) ? false : true)
-            .datum(pattern[inst] || [])
+            .datum(scaledPatterns)
               .transition(150)
                 .attr("d", lineInverse)
                 .style("stroke", color);
         lContainer.select(".inverse-area")
             .classed("opaque-pattern", this.isCurrentColor(inst) ? false : true)
-            .datum(pattern[inst] || [])
+            .datum(scaledPatterns)
               .transition(150)
                 .attr("d", areaInverse)
                 .style("fill", color);
