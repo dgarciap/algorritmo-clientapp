@@ -204,3 +204,7 @@ path.line {
 .subtitle p {
     margin: 6px;
 }
+
+.logo {
+    align-self: flex-start;
+}

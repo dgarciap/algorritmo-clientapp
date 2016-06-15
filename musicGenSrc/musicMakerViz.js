@@ -26,12 +26,6 @@ MakerViz.LEGEND_WIDTH_PERCENT = 3;
 
 MakerViz.FINISH_MESSAGE_AREA_HEIGHT = 75;
 
-//Counter with the number of tones played.
-MakerViz.numberOfTones = 0;
-
-//Number of tones that the user should play to unlock the finish button.
-MakerViz.FINISH_THREDSHOLD = 15;
-
 //Constant containing render time.
 MakerViz.RENDER_INTERVAL_TIME = 300;
 
@@ -128,7 +122,7 @@ MakerViz.printFinishButton = function(playAreaContainer) {
         MakerViz.printFinishMessage(playAreaContainer);
     }
 
-    if(this.isFinishLocked())
+    if(HandPlayer.isFinishLocked())
         playAreaContainer.select(".finish-button").classed("locked-button", true);
     else playAreaContainer.select(".finish-button").classed("locked-button", false);
 };
@@ -641,9 +635,7 @@ MakerViz.updateHandOnScreen = function(handFrame, handState) {
 };
 
 
-MakerViz.render = function(currentTone) {
-    if(currentTone)
-        ++this.numberOfTones;
+MakerViz.render = function() {
     this.printFinishButton(d3.select(".button-areas"));
     var insBarContainer = this.printRecordedInstruments();
     this.printPattern(insBarContainer);
@@ -686,13 +678,7 @@ MakerViz.drawIndications = function() {
             .text("compose");
 };
 
-/**
- * Method which returns true if finish button is locked, false otherwise.
- * @return {Boolean} [description]
- */
-MakerViz.isFinishLocked = function() {
-    return this.numberOfTones <= this.FINISH_THREDSHOLD;
-};
+
 
 MakerViz.showFinishWarning = function() {
     d3.selectAll(".finish-message").transition().style("opacity", 1);

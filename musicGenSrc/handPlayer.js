@@ -42,6 +42,13 @@ HandPlayer.timeoutId = undefined;
  */
 HandPlayer.TONE_GAP = 1;
 
+
+//Counter with the number of tones played.
+HandPlayer.numberOfTones = 0;
+
+//Number of tones that the user should play to unlock the finish button.
+HandPlayer.FINISH_THREDSHOLD = 15;
+
 /**
  * Contains information about a recorded track.
  * This is an array of arrays. Each sub-array corresponds to one instrument and 
@@ -364,6 +371,15 @@ HandPlayer.RENDERS_PER_SECOND = 4;
 //We'll render each 32/HandPlayer.RENDERS_PER_SECOND tones.
 HandPlayer.renderCountdown = 32/HandPlayer.RENDERS_PER_SECOND;
 
+
+/**
+ * Method which returns true if finish button is locked, false otherwise.
+ * @return {Boolean} [description]
+ */
+HandPlayer.isFinishLocked = function() {
+    return this.numberOfTones <= this.FINISH_THREDSHOLD;
+};
+
 /**
  * When invoke iterate over all registered hands and for each of this hands if
  * it has a toned assigned plays this tones and marks it as played.
@@ -384,9 +400,12 @@ HandPlayer.processTones = function() {
     this.playActivePatterns();
     this.moveActivePatternsForward();
 
+    if(LeapManager.handArray[0] && LeapManager.handArray[0].currentTone)
+        ++this.numberOfTones;
+
     if(HandPlayer.renderCountdown === 0) {
         HandPlayer.renderCountdown = 32/HandPlayer.RENDERS_PER_SECOND;
-        MakerViz.render(LeapManager.handArray[0] ? LeapManager.handArray[0].currentTone : null);
+        MakerViz.render();
     }
 
     return true;
